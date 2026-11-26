@@ -14,6 +14,7 @@ include = [
   "/*.md",
   "/*.toml",
   "/COPYING",
+  "/benches",
   "/examples",
   "/include",
   "/quiche.svg",
@@ -74,6 +75,9 @@ ffi = ["dep:cdylib-link-lines"]
 # Exposes internal APIs that have no stability guarantees across versions.
 internal = []
 
+# Use the experimental red-black tree for out-of-order stream data.
+recv-buf-tcp = []
+
 # Enable qlog support with serde_json for extension data
 qlog = ["dep:qlog", "dep:serde", "dep:serde_json", "dep:serde_with"]
 
@@ -127,6 +131,7 @@ windows-sys = { version = "0.59", features = [
 ] }
 
 [dev-dependencies]
+criterion = { version = "0.8", default-features = false }
 mio = { workspace = true, features = ["net", "os-poll"] }
 ring = { workspace = true }
 rstest = { workspace = true }
@@ -134,3 +139,8 @@ url = { workspace = true }
 
 [lib]
 crate-type = ["lib", "staticlib", "cdylib"]
+
+[[bench]]
+name = "recv_buf"
+harness = false
+required-features = ["internal"]

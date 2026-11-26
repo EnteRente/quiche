@@ -84,6 +84,7 @@ where
         Self::from_raw(F::buf_from_slice(buf), off, fin)
     }
 
+    /// Creates a range from an owned buffer without copying its payload.
     pub fn from_raw(data: F::Buf, off: u64, fin: bool) -> RangeBuf<F> {
         RangeBuf {
             len: data.as_ref().len(),

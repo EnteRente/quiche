@@ -432,6 +432,7 @@ use crate::recovery::OnLossDetectionTimeoutOutcome;
 use crate::recovery::RecoveryOps;
 use crate::recovery::ReleaseDecision;
 
+#[cfg(not(feature = "internal"))]
 use crate::stream::RecvAction;
 use crate::stream::StreamPriorityKey;
 
@@ -9769,6 +9770,15 @@ pub use crate::recovery::StartupExit;
 pub use crate::recovery::StartupExitReason;
 
 pub use crate::stream::StreamIter;
+
+#[cfg(feature = "internal")]
+pub use crate::range_buf::RangeBuf;
+#[cfg(feature = "internal")]
+pub use crate::stream::recv_buf::RecvBuf;
+#[cfg(feature = "internal")]
+pub use crate::stream::recv_buf_tcp::RecvBuf as TcpRecvBuf;
+#[cfg(feature = "internal")]
+pub use crate::stream::RecvAction;
 
 pub use crate::transport_params::TransportParams;
 pub use crate::transport_params::UnknownTransportParameter;
