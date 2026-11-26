@@ -47,6 +47,11 @@ use crate::Result;
 
 pub(crate) use self::send_buf::PeerStopSendingState;
 
+#[cfg(not(feature = "recv-buf-tcp"))]
+use self::recv_buf::RecvBuf;
+#[cfg(feature = "recv-buf-tcp")]
+use self::recv_buf_tcp::RecvBuf;
+
 const DEFAULT_URGENCY: u8 = 127;
 
 /// The maximum size of the receiver stream flow control window.
@@ -85,9 +90,15 @@ impl RecvBufResetReturn {
 /// Action to perform when reading from a stream's receive buffer.
 pub enum RecvAction<T: bytes::BufMut> {
     /// Emit data by copying it into the provided buffer.
-    Emit { out: T },
+    Emit {
+        /// Destination for the emitted bytes.
+        out: T,
+    },
     /// Discard up to the specified number of bytes without copying.
-    Discard { len: usize },
+    Discard {
+        /// Maximum number of bytes to discard.
+        len: usize,
+    },
 }
 
 impl std::hash::Hasher for StreamIdHasher {
@@ -906,7 +917,7 @@ pub(crate) enum StreamState {
 /// A QUIC stream.
 pub struct Stream<F: BufFactory = DefaultBufFactory> {
     /// Receive-side stream buffer.
-    pub recv: recv_buf::RecvBuf,
+    pub recv: RecvBuf,
 
     /// Send-side stream buffer.
     pub send: send_buf::SendBuf<F>,
@@ -940,7 +951,7 @@ impl<F: BufFactory> Stream<F> {
         });
 
         Stream {
-            recv: recv_buf::RecvBuf::new(max_rx_data, initial_window, max_window),
+            recv: RecvBuf::new(max_rx_data, initial_window, max_window),
             send: send_buf::SendBuf::new(max_tx_data),
             send_lowat: 1,
             bidi: is_bidi(id),
@@ -2967,5 +2978,8 @@ mod tests {
     }
 }
 
-mod recv_buf;
+#[cfg(any(test, feature = "internal", not(feature = "recv-buf-tcp")))]
+pub(crate) mod recv_buf;
+#[cfg(any(test, feature = "internal", feature = "recv-buf-tcp"))]
+pub(crate) mod recv_buf_tcp;
 mod send_buf;
